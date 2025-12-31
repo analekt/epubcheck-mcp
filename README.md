@@ -10,6 +10,7 @@ An MCP (Model Context Protocol) server that integrates EPUBCheck for EPUB valida
 - **Metadata Extraction**: Extract publication metadata and structure information
 - **Error Explanation**: Get detailed explanations for EPUBCheck error codes
 - **Bundled EPUBCheck**: Includes EPUBCheck 5.3.0, no separate installation needed
+- **Auto Update Check**: Notifies when new EPUBCheck versions are available
 
 ## Requirements
 
@@ -18,28 +19,66 @@ An MCP (Model Context Protocol) server that integrates EPUBCheck for EPUB valida
 
 ## Installation
 
+### Using npx (Recommended)
+
+No installation required - run directly:
+
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/epubcheck-mcp.git
+npx epubcheck-mcp
+```
+
+### Global Installation
+
+```bash
+npm install -g epubcheck-mcp
+```
+
+### From Source
+
+```bash
+git clone https://github.com/analekt/epubcheck-mcp.git
 cd epubcheck-mcp
-
-# Install dependencies
 npm install
-
-# Build
 npm run build
 ```
 
 ## Usage with Claude Code
 
-Add to your Claude Code MCP settings (`~/.claude/claude_desktop_config.json`):
+Add to your Claude Code MCP settings (`~/.claude.json`):
 
 ```json
 {
   "mcpServers": {
     "epubcheck": {
-      "command": "node",
-      "args": ["/path/to/epubcheck-mcp/dist/index.js"]
+      "command": "npx",
+      "args": ["epubcheck-mcp"]
+    }
+  }
+}
+```
+
+Or if installed globally:
+
+```json
+{
+  "mcpServers": {
+    "epubcheck": {
+      "command": "epubcheck-mcp"
+    }
+  }
+}
+```
+
+## Usage with Claude Desktop
+
+Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+
+```json
+{
+  "mcpServers": {
+    "epubcheck": {
+      "command": "npx",
+      "args": ["epubcheck-mcp"]
     }
   }
 }
@@ -226,7 +265,8 @@ epubcheck-mcp/
 │   └── epubcheck/
 │       ├── types.ts      # TypeScript types
 │       ├── runner.ts     # EPUBCheck JAR runner
-│       └── messages.ts   # Error code explanations
+│       ├── messages.ts   # Error code explanations
+│       └── version-checker.ts  # Auto update checker
 ├── bin/
 │   ├── epubcheck.jar     # Bundled EPUBCheck
 │   └── lib/              # EPUBCheck dependencies

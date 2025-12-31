@@ -1,0 +1,30 @@
+# Source files (dist is included)
+src/
+tsconfig.json
+tsup.config.ts
+
+# Test files
+test/
+
+# Development files
+.git/
+.gitignore
+.eslintrc*
+.prettierrc*
+.vscode/
+.idea/
+
+# Documentation (README is included by default)
+claude.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Package manager
+node_modules/
+package-lock.json
