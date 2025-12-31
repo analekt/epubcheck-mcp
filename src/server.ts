@@ -11,6 +11,7 @@ import {
   getEpubCheckVersion,
   explainErrorCode,
   getAllErrorCodes,
+  getUpdateNotification,
   type EpubCheckResult,
   type ValidateMode,
   type ValidateProfile,
@@ -471,11 +472,19 @@ async function handleListChecks(args: Record<string, unknown>) {
 async function handleGetVersion() {
   const version = await getEpubCheckVersion();
 
+  let text = `EPUBCheck version: ${version}\nMCP Server version: 0.1.0`;
+
+  // Add update notification if available
+  const updateNotice = getUpdateNotification(version);
+  if (updateNotice) {
+    text += updateNotice;
+  }
+
   return {
     content: [
       {
         type: "text",
-        text: `EPUBCheck version: ${version}\nMCP Server version: 0.1.0`,
+        text,
       },
     ],
   };
@@ -501,6 +510,12 @@ function formatValidationResult(result: EpubCheckResult): string {
     output += `**Status: VALID** - No issues found.\n`;
   } else {
     output += formatMessages(messages);
+  }
+
+  // Add update notification if available
+  const updateNotice = getUpdateNotification(checker.checkerVersion);
+  if (updateNotice) {
+    output += updateNotice;
   }
 
   return output;

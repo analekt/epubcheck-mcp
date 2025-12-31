@@ -6,9 +6,13 @@ import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { randomUUID } from "crypto";
 import type { EpubCheckResult, ValidateOptions } from "./types.js";
+import { checkForUpdatesAsync } from "./version-checker.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+// Cached version to avoid repeated subprocess calls
+let cachedVersion: string | null = null;
 
 function getJarPath(): string {
   // Environment variable override
@@ -81,27 +85,35 @@ export async function runEpubCheck(
 }
 
 export async function getEpubCheckVersion(): Promise<string> {
+  // Return cached version if available
+  if (cachedVersion) {
+    return cachedVersion;
+  }
+
   const jarPath = getJarPath();
 
   return new Promise((resolve, reject) => {
-    const process = spawn("java", ["-jar", jarPath, "--version"]);
+    const proc = spawn("java", ["-jar", jarPath, "--version"]);
 
     let stdout = "";
 
-    process.stdout.on("data", (data) => {
+    proc.stdout.on("data", (data) => {
       stdout += data.toString();
     });
 
-    process.on("close", () => {
+    proc.on("close", () => {
       const match = stdout.match(/EPUBCheck v([\d.]+)/);
       if (match) {
-        resolve(match[1]);
+        cachedVersion = match[1];
+        // Trigger background update check
+        checkForUpdatesAsync(cachedVersion);
+        resolve(cachedVersion);
       } else {
         resolve(stdout.trim() || "unknown");
       }
     });
 
-    process.on("error", (error) => {
+    proc.on("error", (error) => {
       reject(new Error(`Failed to get EPUBCheck version: ${error.message}`));
     });
   });
